@@ -1,0 +1,257 @@
+{
+  "name": "Jobs Scraper",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -540,
+        -60
+      ],
+      "id": "c5be6121-cc0b-4f80-9541-10e66abea581",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://jsearch.p.rapidapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "AI Engineer "
+            },
+            {
+              "name": "location",
+              "value": "india"
+            },
+            {
+              "name": "num_pages",
+              "value": "2"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-key",
+              "value": "f713f406cemsh1d47bbb21a79b1fp1b9a24jsn2bc582df898b"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        -60
+      ],
+      "id": "8c350740-e6b2-467f-b4ef-721eb81f6328",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"jobs\": {{ $json.data.map(job => ({\n    \"Job Title\": job.job_title || 'Not specified',\n    \"Company\": job.employer_name || 'Not specified',\n    \"Location\": (job.job_city && job.job_state) ? `${job.job_city}, ${job.job_state}` : 'Not specified',\n    \"Salary\": job.salary || 'Not specified',\n    \"Job Type\": job.job_employment_type || 'Not specified',\n    \"Apply Link\": job.job_apply_link || 'Not specified'\n  })) }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -100,
+        -60
+      ],
+      "id": "67eed94e-9f81-492b-80e0-2951b6041e0c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1YaqEFHAq6d_65C7PO_4oeFOOMxvnh3eSHZq37x7b-dw",
+          "mode": "list",
+          "cachedResultName": "Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YaqEFHAq6d_65C7PO_4oeFOOMxvnh3eSHZq37x7b-dw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YaqEFHAq6d_65C7PO_4oeFOOMxvnh3eSHZq37x7b-dw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Job Title": "={{ $json[\"Job Title\"] }}",
+            "Company": "={{ $json.Company }}",
+            "Salary": "={{ $json.Salary }}",
+            "Job Type": "={{ $json[\"Job Type\"] }}",
+            "Apply LInk": "={{ $json[\"Apply Link\"] }}",
+            "Location": "={{ $json.Location }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Salary",
+              "displayName": "Salary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Type",
+              "displayName": "Job Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Apply LInk",
+              "displayName": "Apply LInk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "jobs",
+              "displayName": "jobs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        340,
+        -60
+      ],
+      "id": "49cc480c-2e06-4392-90ee-c6b4231ea0ec",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "T4GSsYFATWtPtEF9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assuming \"jobs\" is an array on the JSON input\nreturn items[0].json.jobs.map(job => {\n  return {\n    json: job\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        120,
+        -60
+      ],
+      "id": "fe3283e5-13c5-4c16-9fe1-6a8995a80349",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ee89e160-ad98-443d-a67b-75fffa5bd8a6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e65f07dabfc59d63ab626c8637218ca36bc8b33cffac9f8c585b77cc91de61c"
+  },
+  "id": "evo7K6YmmquUW663",
+  "tags": []
+}
